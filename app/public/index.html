@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Git Deploy Scheduler</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <div class="logo">
+                    <span class="material-icons">schedule</span>
+                    <h1>Git Deploy Scheduler</h1>
+                </div>
+                <nav class="nav-tabs">
+                    <button class="tab-btn active" data-tab="dashboard">
+                        <span class="material-icons">dashboard</span>
+                        Dashboard
+                    </button>
+                    <button class="tab-btn" data-tab="settings">
+                        <span class="material-icons">settings</span>
+                        Settings
+                    </button>
+                </nav>
+            </div>
+        </header>
+
+        <!-- Dashboard Tab -->
+        <div id="dashboard-tab" class="tab-content active">
+            <!-- Stats Cards -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <span class="material-icons">check_circle</span>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="total-commits">0</div>
+                        <div class="stat-label">Total Commits</div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon success">
+                        <span class="material-icons">done_all</span>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="successful-commits">0</div>
+                        <div class="stat-label">Successful</div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon warning">
+                        <span class="material-icons">edit_note</span>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="files-changed">0</div>
+                        <div class="stat-label">Files Changed</div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon ai">
+                        <span class="material-icons">psychology</span>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="ollama-usage">0</div>
+                        <div class="stat-label">AI Generated</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Status Section -->
+            <div class="status-section">
+                <div class="status-card">
+                    <h2>
+                        <span class="material-icons">schedule</span>
+                        Scheduler Status
+                    </h2>
+                    <div class="status-info">
+                        <div class="status-badge" id="scheduler-status">
+                            <span class="status-dot"></span>
+                            <span id="status-text">Loading...</span>
+                        </div>
+                        <div class="status-times">
+                            <div class="time-item">
+                                <span class="material-icons">update</span>
+                                <span>Last Run: <strong id="last-run">Never</strong></span>
+                            </div>
+                            <div class="time-item">
+                                <span class="material-icons">schedule</span>
+                                <span>Next Run: <strong id="next-run">Not scheduled</strong></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Controls -->
+                <div class="controls-card">
+                    <h2>
+                        <span class="material-icons">tune</span>
+                        Controls
+                    </h2>
+                    <div class="controls-grid">
+                        <button id="pause-btn" class="control-btn warning">
+                            <span class="material-icons">pause</span>
+                            Pause
+                        </button>
+                        <button id="resume-btn" class="control-btn success">
+                            <span class="material-icons">play_arrow</span>
+                            Resume
+                        </button>
+                        <button id="trigger-btn" class="control-btn primary">
+                            <span class="material-icons">send</span>
+                            Trigger Now
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Commit History -->
+            <div class="history-section">
+                <h2>
+                    <span class="material-icons">history</span>
+                    Recent Commits
+                </h2>
+                <div id="commit-feed" class="commit-feed">
+                    <div class="loading">Loading commits...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Settings Tab -->
+        <div id="settings-tab" class="tab-content">
+            <div class="settings-container">
+                <!-- Credentials Section -->
+                <div class="settings-card">
+                    <h2>
+                        <span class="material-icons">key</span>
+                        Git Credentials
+                    </h2>
+                    <p class="settings-description">
+                        Store your Personal Access Token securely in the system keychain
+                    </p>
+
+                    <form id="credentials-form" class="settings-form">
+                        <div class="form-group">
+                            <label for="pat-token">
+                                <span class="material-icons">vpn_key</span>
+                                Personal Access Token (PAT)
+                            </label>
+                            <input type="password" id="pat-token" placeholder="ghp_xxxxxxxxxxxxx" class="form-input">
+                            <small>Your GitHub/GitLab PAT for pushing commits</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="git-username">
+                                <span class="material-icons">person</span>
+                                Git Username
+                            </label>
+                            <input type="text" id="git-username" placeholder="your-username" class="form-input">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="git-email">
+                                <span class="material-icons">email</span>
+                                Git Email
+                            </label>
+                            <input type="email" id="git-email" placeholder="you@example.com" class="form-input">
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn-primary">
+                                <span class="material-icons">save</span>
+                                Save Credentials
+                            </button>
+                            <button type="button" id="delete-credentials-btn" class="btn-danger">
+                                <span class="material-icons">delete</span>
+                                Delete
+                            </button>
+                        </div>
+
+                        <div class="credentials-status">
+                            <span id="credentials-indicator" class="status-indicator"></span>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Configuration Section -->
+                <div class="settings-card">
+                    <h2>
+                        <span class="material-icons">tune</span>
+                        Configuration
+                    </h2>
+                    <p class="settings-description">
+                        Adjust scheduler and AI settings
+                    </p>
+
+                    <form id="config-form" class="settings-form">
+                        <div class="form-group">
+                            <label for="ollama-theme">
+                                <span class="material-icons">palette</span>
+                                AI Commit Theme
+                            </label>
+                            <select id="ollama-theme" class="form-input">
+                                <option value="">None</option>
+                                <option value="kubernetes">Kubernetes</option>
+                                <option value="docker">Docker</option>
+                                <option value="terraform">Terraform</option>
+                                <option value="aws">AWS</option>
+                                <option value="microservices">Microservices</option>
+                            </select>
+                            <small>Theme influences AI-generated commit messages</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="base-interval">
+                                <span class="material-icons">timer</span>
+                                Base Interval (seconds)
+                            </label>
+                            <input type="number" id="base-interval" value="600" min="60" class="form-input">
+                            <small>Time between commits (default: 600s = 10 minutes)</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="jitter-range">
+                                <span class="material-icons">shuffle</span>
+                                Jitter Range (±seconds)
+                            </label>
+                            <input type="number" id="jitter-range" value="50" min="0" class="form-input">
+                            <small>Random variation to add/subtract from interval</small>
+                        </div>
+
+                        <div class="form-group checkbox-group">
+                            <label>
+                                <input type="checkbox" id="push-enabled">
+                                <span class="checkbox-label">
+                                    <span class="material-icons">cloud_upload</span>
+                                    Enable Auto-Push
+                                </span>
+                            </label>
+                            <small>Automatically push commits to remote repository</small>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn-primary">
+                                <span class="material-icons">save</span>
+                                Save Configuration
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/app.js"></script>
+</body>
+</html>

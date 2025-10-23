@@ -1,37 +1,10 @@
-repositories:
-  - path: /Users/justynroberts/work/git-deploy-schedule
-    branch: main
-    enabled: true
-
+git:
+  push_enabled: true
 schedule:
-  base_interval: 600  # 10 minutes in seconds
-  jitter_range: 50    # ±50 seconds
-
+  base_interval: 600
+  jitter_range: 50
 ollama:
-  enabled: true
-  url: http://oracle.local:11434
-  model: llama3.1:8b
-  timeout: 30
-  max_tokens: 100
-  theme: "kubernetes"  # Optional: kubernetes, docker, terraform, aws, microservices, api, frontend, backend, etc.
-  system_prompt: |
-    Generate a concise, realistic git commit message based on the provided file changes.
-    Follow conventional commit format (type: description).
-    Types: feat, fix, refactor, docs, style, test, chore.
-    Be specific but brief. Output only the commit message, nothing else.
-
-commit:
-  use_ollama: true
-  message_template: "chore: automated update - {timestamp}"
-  author_name: "Auto Deploy Bot"
-  author_email: "bot@example.com"
-  include_diff_context: true
-
-push:
-  enabled: false  # Set to true to push to remote
-  retry_attempts: 3
-  retry_delay: 30
-
-logging:
-  level: INFO
-  file: logs/scheduler.log
+  theme: kubernetes
+server:
+  host: 0.0.0.0
+  port: 3001

@@ -10,10 +10,13 @@ const API_PORT = 5000;
 // Python backend process
 function startPythonBackend() {
     const pythonScript = path.join(__dirname, '../../main_web.py');
+    const rootDir = path.join(__dirname, '../..');
     const python = process.platform === 'win32' ? 'python' : 'python3';
 
     console.log('Starting Python backend...');
-    pythonProcess = spawn(python, [pythonScript, '--host', '127.0.0.1', '--port', API_PORT.toString()]);
+    pythonProcess = spawn(python, [pythonScript, '--host', '127.0.0.1', '--port', API_PORT.toString()], {
+        cwd: rootDir
+    });
 
     pythonProcess.stdout.on('data', (data) => {
         console.log(`Python: ${data}`);
