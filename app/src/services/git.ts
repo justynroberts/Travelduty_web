@@ -23,12 +23,13 @@ export class GitService {
     const credentials = await this.credentialsService.getCredentials();
 
     if (credentials.pat_token) {
-      // Configure remote with PAT
+      // Configure remote with PAT only if not already set
       const remotes = await this.git.getRemotes(true);
       if (remotes.length > 0) {
         const remote = remotes[0];
         const remoteUrl = remote.refs.push;
-        if (remoteUrl) {
+        if (remoteUrl && !remoteUrl.includes('x-access-token')) {
+          // Only add token if not already present
           const authenticatedUrl = this.getAuthenticatedUrl(remoteUrl, credentials.pat_token);
           await this.git.remote(['set-url', remote.name, authenticatedUrl]);
         }
@@ -38,6 +39,7 @@ export class GitService {
     for (let attempt = 0; attempt < retryAttempts; attempt++) {
       try {
         await this.git.push();
+        console.log('✅ Pushed successfully to remote');
         return true;
       } catch (error) {
         console.error(`Push attempt ${attempt + 1} failed:`, error);
