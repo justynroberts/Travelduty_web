@@ -12,3 +12,4 @@ Modify this file to test the system.
 Test modification for Ollama commit message generation
 Another modification to test improved message parsing
 # Kubernetes deployment example
+Test change for web UI demo
