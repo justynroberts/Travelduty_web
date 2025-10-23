@@ -190,9 +190,24 @@ class GitScheduler:
 
             if not success:
                 logger.error("Failed to create commit")
+                # Track failed commit
+                if self.db:
+                    self.db.add_commit(
+                        commit_hash="",
+                        message=message,
+                        files_changed=len(changed_files),
+                        success=False,
+                        used_ollama=self.message_generator.use_ollama,
+                        theme=theme,
+                        error_message="Failed to create commit"
+                    )
                 return False
 
+            # Get the commit hash
+            commit_hash = self.git_ops.repo.head.commit.hexsha
+
             # Push if enabled
+            push_success = False
             push_config = self.config.get_push_config()
             if push_config.get('enabled', False):
                 logger.info("Pushing to remote...")
@@ -206,10 +221,32 @@ class GitScheduler:
                 else:
                     logger.warning("Failed to push to remote (commit saved locally)")
 
+            # Track successful commit in database
+            if self.db:
+                self.db.add_commit(
+                    commit_hash=commit_hash,
+                    message=message,
+                    files_changed=len(changed_files),
+                    success=True,
+                    used_ollama=self.message_generator.use_ollama and self.ollama_client is not None,
+                    theme=theme,
+                    push_success=push_success
+                )
+
             return True
 
         except Exception as e:
             logger.error(f"Error during commit: {e}")
+            # Track error
+            if self.db:
+                self.db.add_commit(
+                    commit_hash="",
+                    message="Error during commit",
+                    files_changed=0,
+                    success=False,
+                    used_ollama=False,
+                    error_message=str(e)
+                )
             return False
 
     def run_once(self) -> bool:
@@ -228,15 +265,34 @@ class GitScheduler:
 
         try:
             while True:
+                # Check if paused
+                if self.paused:
+                    logger.info("Scheduler paused, waiting...")
+                    time.sleep(5)
+                    continue
+
                 # Calculate next interval
                 interval = self._calculate_next_interval()
 
-                # Wait for the interval
-                logger.info(f"Waiting until {datetime.now().strftime('%H:%M:%S')} + {interval:.0f}s")
-                time.sleep(interval)
+                # Store next commit time for API
+                self.next_commit_time = datetime.now()
+                self.next_commit_time = self.next_commit_time.replace(microsecond=0)
+                from datetime import timedelta
+                self.next_commit_time += timedelta(seconds=interval)
 
-                # Perform commit
-                self._perform_commit()
+                # Wait for the interval (check pause every 5 seconds)
+                logger.info(f"Waiting until {datetime.now().strftime('%H:%M:%S')} + {interval:.0f}s")
+                elapsed = 0
+                while elapsed < interval:
+                    if self.paused:
+                        break
+                    sleep_time = min(5, interval - elapsed)
+                    time.sleep(sleep_time)
+                    elapsed += sleep_time
+
+                # Perform commit if not paused
+                if not self.paused:
+                    self._perform_commit()
 
         except KeyboardInterrupt:
             logger.info("Scheduler stopped by user")
