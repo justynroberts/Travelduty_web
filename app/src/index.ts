@@ -60,7 +60,7 @@ async function main() {
   app.use(express.static(path.join(__dirname, '../public')));
 
   // API routes
-  app.use('/api', createApiRouter(scheduler, db, credentialsService, configService));
+  app.use('/api', createApiRouter(scheduler, db, credentialsService, configService, gitService));
 
   // Serve index.html for root
   app.get('/', (req, res) => {

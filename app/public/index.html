@@ -6,8 +6,8 @@
     <title>Git Deploy Scheduler</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
@@ -16,16 +16,16 @@
         <header class="header">
             <div class="header-content">
                 <div class="logo">
-                    <span class="material-icons">schedule</span>
+                    <i class="ph ph-clock"></i>
                     <h1>Git Deploy Scheduler</h1>
                 </div>
                 <nav class="nav-tabs">
                     <button class="tab-btn active" data-tab="dashboard">
-                        <span class="material-icons">dashboard</span>
+                        <i class="ph ph-gauge"></i>
                         Dashboard
                     </button>
                     <button class="tab-btn" data-tab="settings">
-                        <span class="material-icons">settings</span>
+                        <i class="ph ph-gear"></i>
                         Settings
                     </button>
                 </nav>
@@ -38,7 +38,7 @@
             <div class="stats-grid">
                 <div class="stat-card">
                     <div class="stat-icon">
-                        <span class="material-icons">check_circle</span>
+                        <i class="ph ph-git-commit"></i>
                     </div>
                     <div class="stat-content">
                         <div class="stat-value" id="total-commits">0</div>
@@ -48,7 +48,7 @@
 
                 <div class="stat-card">
                     <div class="stat-icon success">
-                        <span class="material-icons">done_all</span>
+                        <i class="ph ph-check-circle"></i>
                     </div>
                     <div class="stat-content">
                         <div class="stat-value" id="successful-commits">0</div>
@@ -58,7 +58,7 @@
 
                 <div class="stat-card">
                     <div class="stat-icon warning">
-                        <span class="material-icons">edit_note</span>
+                        <i class="ph ph-file-text"></i>
                     </div>
                     <div class="stat-content">
                         <div class="stat-value" id="files-changed">0</div>
@@ -68,7 +68,7 @@
 
                 <div class="stat-card">
                     <div class="stat-icon ai">
-                        <span class="material-icons">psychology</span>
+                        <i class="ph ph-brain"></i>
                     </div>
                     <div class="stat-content">
                         <div class="stat-value" id="ollama-usage">0</div>
@@ -81,7 +81,7 @@
             <div class="status-section">
                 <div class="status-card">
                     <h2>
-                        <span class="material-icons">schedule</span>
+                        <i class="ph ph-clock-clockwise"></i>
                         Scheduler Status
                     </h2>
                     <div class="status-info">
@@ -91,11 +91,11 @@
                         </div>
                         <div class="status-times">
                             <div class="time-item">
-                                <span class="material-icons">update</span>
+                                <i class="ph ph-arrow-counter-clockwise"></i>
                                 <span>Last Run: <strong id="last-run">Never</strong></span>
                             </div>
                             <div class="time-item">
-                                <span class="material-icons">schedule</span>
+                                <i class="ph ph-calendar-blank"></i>
                                 <span>Next Run: <strong id="next-run">Not scheduled</strong></span>
                             </div>
                         </div>
@@ -105,20 +105,20 @@
                 <!-- Controls -->
                 <div class="controls-card">
                     <h2>
-                        <span class="material-icons">tune</span>
+                        <i class="ph ph-sliders"></i>
                         Controls
                     </h2>
                     <div class="controls-grid">
                         <button id="pause-btn" class="control-btn warning">
-                            <span class="material-icons">pause</span>
+                            <i class="ph ph-pause"></i>
                             Pause
                         </button>
                         <button id="resume-btn" class="control-btn success">
-                            <span class="material-icons">play_arrow</span>
+                            <i class="ph ph-play"></i>
                             Resume
                         </button>
                         <button id="trigger-btn" class="control-btn primary">
-                            <span class="material-icons">send</span>
+                            <i class="ph ph-paper-plane-tilt"></i>
                             Trigger Now
                         </button>
                     </div>
@@ -128,7 +128,7 @@
             <!-- Commit History -->
             <div class="history-section">
                 <h2>
-                    <span class="material-icons">history</span>
+                    <i class="ph ph-clock-counter-clockwise"></i>
                     Recent Commits
                 </h2>
                 <div id="commit-feed" class="commit-feed">
@@ -143,7 +143,7 @@
                 <!-- Credentials Section -->
                 <div class="settings-card">
                     <h2>
-                        <span class="material-icons">key</span>
+                        <i class="ph ph-key"></i>
                         Git Credentials
                     </h2>
                     <p class="settings-description">
@@ -153,7 +153,7 @@
                     <form id="credentials-form" class="settings-form">
                         <div class="form-group">
                             <label for="pat-token">
-                                <span class="material-icons">vpn_key</span>
+                                <i class="ph ph-password"></i>
                                 Personal Access Token (PAT)
                             </label>
                             <input type="password" id="pat-token" placeholder="ghp_xxxxxxxxxxxxx" class="form-input">
@@ -162,7 +162,7 @@
 
                         <div class="form-group">
                             <label for="git-username">
-                                <span class="material-icons">person</span>
+                                <i class="ph ph-user"></i>
                                 Git Username
                             </label>
                             <input type="text" id="git-username" placeholder="your-username" class="form-input">
@@ -170,7 +170,7 @@
 
                         <div class="form-group">
                             <label for="git-email">
-                                <span class="material-icons">email</span>
+                                <i class="ph ph-envelope"></i>
                                 Git Email
                             </label>
                             <input type="email" id="git-email" placeholder="you@example.com" class="form-input">
@@ -178,11 +178,11 @@
 
                         <div class="form-actions">
                             <button type="submit" class="btn-primary">
-                                <span class="material-icons">save</span>
+                                <i class="ph ph-floppy-disk"></i>
                                 Save Credentials
                             </button>
                             <button type="button" id="delete-credentials-btn" class="btn-danger">
-                                <span class="material-icons">delete</span>
+                                <i class="ph ph-trash"></i>
                                 Delete
                             </button>
                         </div>
@@ -193,10 +193,47 @@
                     </form>
                 </div>
 
+                <!-- Git Repository Section -->
+                <div class="settings-card">
+                    <h2>
+                        <i class="ph ph-git-branch"></i>
+                        Git Repository
+                    </h2>
+                    <p class="settings-description">
+                        Configure the remote repository URL. The repository will be created if it doesn't exist.
+                    </p>
+
+                    <form id="repository-form" class="settings-form">
+                        <div class="form-group">
+                            <label for="repo-url">
+                                <i class="ph ph-link"></i>
+                                Repository URL
+                            </label>
+                            <input type="text" id="repo-url" placeholder="https://github.com/username/repo.git" class="form-input">
+                            <small>HTTPS URL of your GitHub/GitLab repository</small>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn-primary">
+                                <i class="ph ph-floppy-disk"></i>
+                                Update Repository
+                            </button>
+                            <button type="button" id="get-repo-btn" class="btn-secondary">
+                                <i class="ph ph-arrow-clockwise"></i>
+                                Get Current
+                            </button>
+                        </div>
+
+                        <div class="credentials-status">
+                            <span id="repository-indicator" class="status-indicator"></span>
+                        </div>
+                    </form>
+                </div>
+
                 <!-- Configuration Section -->
                 <div class="settings-card">
                     <h2>
-                        <span class="material-icons">tune</span>
+                        <i class="ph ph-sliders"></i>
                         Configuration
                     </h2>
                     <p class="settings-description">
@@ -206,7 +243,7 @@
                     <form id="config-form" class="settings-form">
                         <div class="form-group">
                             <label for="ollama-theme">
-                                <span class="material-icons">palette</span>
+                                <i class="ph ph-palette"></i>
                                 AI Commit Theme
                             </label>
                             <select id="ollama-theme" class="form-input">
@@ -222,7 +259,7 @@
 
                         <div class="form-group">
                             <label for="base-interval">
-                                <span class="material-icons">timer</span>
+                                <i class="ph ph-timer"></i>
                                 Base Interval (seconds)
                             </label>
                             <input type="number" id="base-interval" value="600" min="60" class="form-input">
@@ -231,7 +268,7 @@
 
                         <div class="form-group">
                             <label for="jitter-range">
-                                <span class="material-icons">shuffle</span>
+                                <i class="ph ph-shuffle"></i>
                                 Jitter Range (±seconds)
                             </label>
                             <input type="number" id="jitter-range" value="50" min="0" class="form-input">
@@ -242,7 +279,7 @@
                             <label>
                                 <input type="checkbox" id="push-enabled">
                                 <span class="checkbox-label">
-                                    <span class="material-icons">cloud_upload</span>
+                                    <i class="ph ph-cloud-arrow-up"></i>
                                     Enable Auto-Push
                                 </span>
                             </label>
@@ -251,7 +288,7 @@
 
                         <div class="form-actions">
                             <button type="submit" class="btn-primary">
-                                <span class="material-icons">save</span>
+                                <i class="ph ph-floppy-disk"></i>
                                 Save Configuration
                             </button>
                         </div>

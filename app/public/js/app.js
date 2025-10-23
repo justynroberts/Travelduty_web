@@ -91,12 +91,12 @@ async function loadHistory() {
                 <div class="commit-message">${commit.message}</div>
                 <div class="commit-meta">
                     <span class="meta-badge">
-                        <span class="material-icons" style="font-size: 0.9rem;">insert_drive_file</span>
+                        <i class="ph ph-file" style="font-size: 0.9rem;"></i>
                         ${commit.files_changed} files
                     </span>
-                    ${commit.used_ollama ? '<span class="meta-badge ai"><span class="material-icons" style="font-size: 0.9rem;">psychology</span> AI</span>' : ''}
+                    ${commit.used_ollama ? '<span class="meta-badge ai"><i class="ph ph-brain" style="font-size: 0.9rem;"></i> AI</span>' : ''}
                     ${commit.theme ? `<span class="meta-badge">${commit.theme}</span>` : ''}
-                    ${commit.push_success ? '<span class="meta-badge"><span class="material-icons" style="font-size: 0.9rem;">cloud_done</span> Pushed</span>' : ''}
+                    ${commit.push_success ? '<span class="meta-badge"><i class="ph ph-cloud-check" style="font-size: 0.9rem;"></i> Pushed</span>' : ''}
                 </div>
             </div>
         `).join('');
@@ -227,6 +227,61 @@ document.getElementById('delete-credentials-btn').addEventListener('click', asyn
         alert('Failed to delete credentials');
     }
 });
+
+// Repository form handling
+document.getElementById('repository-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const url = document.getElementById('repo-url').value;
+
+    try {
+        const response = await fetch(`${API_BASE}/api/repository`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ url })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            showRepositoryStatus('Repository URL updated successfully', 'success');
+        } else {
+            showRepositoryStatus(data.error || 'Failed to update repository', 'error');
+        }
+
+    } catch (error) {
+        console.error('Error updating repository:', error);
+        showRepositoryStatus('Failed to update repository', 'error');
+    }
+});
+
+document.getElementById('get-repo-btn').addEventListener('click', async () => {
+    try {
+        const response = await fetch(`${API_BASE}/api/repository`);
+        const data = await response.json();
+
+        if (data.url) {
+            document.getElementById('repo-url').value = data.url;
+            showRepositoryStatus(`Current repository: ${data.url}`, 'success');
+        } else {
+            showRepositoryStatus('No repository configured', 'warning');
+        }
+
+    } catch (error) {
+        console.error('Error getting repository:', error);
+        showRepositoryStatus('Failed to get repository', 'error');
+    }
+});
+
+function showRepositoryStatus(message, type) {
+    const indicator = document.getElementById('repository-indicator');
+    indicator.textContent = message;
+    indicator.className = `status-indicator ${type}`;
+    setTimeout(() => {
+        indicator.textContent = '';
+        indicator.className = 'status-indicator';
+    }, 3000);
+}
 
 // Config Form
 document.getElementById('config-form').addEventListener('submit', async (e) => {

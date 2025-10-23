@@ -78,6 +78,29 @@ export class GitService {
     return branch.current;
   }
 
+  async getRemoteUrl(): Promise<string | null> {
+    const remotes = await this.git.getRemotes(true);
+    if (remotes.length > 0 && remotes[0].refs.push) {
+      // Return clean URL without token
+      return remotes[0].refs.push.replace(/https:\/\/(x-access-token:[^@]+@)?/, 'https://');
+    }
+    return null;
+  }
+
+  async setRemoteUrl(url: string): Promise<void> {
+    // Clean the URL to ensure no token is in it
+    const cleanUrl = url.replace(/https:\/\/(x-access-token:[^@]+@)?/, 'https://');
+
+    const remotes = await this.git.getRemotes(true);
+    if (remotes.length > 0) {
+      // Update existing remote
+      await this.git.remote(['set-url', remotes[0].name, cleanUrl]);
+    } else {
+      // Add new remote
+      await this.git.addRemote('origin', cleanUrl);
+    }
+  }
+
   private getAuthenticatedUrl(url: string, token: string): string {
     if (url.startsWith('https://')) {
       return url.replace('https://', `https://x-access-token:${token}@`);

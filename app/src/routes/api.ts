@@ -3,12 +3,14 @@ import { SchedulerService } from '../services/scheduler';
 import { DatabaseService } from '../services/database';
 import { CredentialsService } from '../services/credentials';
 import { ConfigService } from '../services/config';
+import { GitService } from '../services/git';
 
 export function createApiRouter(
   scheduler: SchedulerService,
   db: DatabaseService,
   credentialsService: CredentialsService,
-  configService: ConfigService
+  configService: ConfigService,
+  gitService: GitService
 ): Router {
   const router = Router();
 
@@ -120,6 +122,29 @@ export function createApiRouter(
       const updates = req.body;
       configService.updateConfig(updates);
       res.json({ success: true, message: 'Configuration updated' });
+    } catch (error) {
+      res.status(500).json({ error: (error as Error).message });
+    }
+  });
+
+  // Repository endpoints
+  router.get('/repository', async (req: Request, res: Response) => {
+    try {
+      const url = await gitService.getRemoteUrl();
+      res.json({ url });
+    } catch (error) {
+      res.status(500).json({ error: (error as Error).message });
+    }
+  });
+
+  router.post('/repository', async (req: Request, res: Response) => {
+    try {
+      const { url } = req.body;
+      if (!url) {
+        return res.status(400).json({ error: 'Repository URL is required' });
+      }
+      await gitService.setRemoteUrl(url);
+      res.json({ success: true, message: 'Repository URL updated' });
     } catch (error) {
       res.status(500).json({ error: (error as Error).message });
     }
