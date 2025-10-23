@@ -22,22 +22,28 @@ export class GitService {
   async push(retryAttempts: number = 3, retryDelay: number = 5000): Promise<boolean> {
     const credentials = await this.credentialsService.getCredentials();
 
-    if (credentials.pat_token) {
-      // Configure remote with PAT only if not already set
-      const remotes = await this.git.getRemotes(true);
-      if (remotes.length > 0) {
-        const remote = remotes[0];
-        const remoteUrl = remote.refs.push;
-        if (remoteUrl && !remoteUrl.includes('x-access-token')) {
-          // Only add token if not already present
-          const authenticatedUrl = this.getAuthenticatedUrl(remoteUrl, credentials.pat_token);
-          await this.git.remote(['set-url', remote.name, authenticatedUrl]);
-        }
-      }
-    }
-
     for (let attempt = 0; attempt < retryAttempts; attempt++) {
       try {
+        // Use push with authentication in the command itself if PAT is available
+        if (credentials.pat_token) {
+          // Get remote URL
+          const remotes = await this.git.getRemotes(true);
+          if (remotes.length > 0) {
+            const remoteUrl = remotes[0].refs.push;
+            if (remoteUrl) {
+              // Clean URL and build authenticated URL
+              const cleanUrl = remoteUrl.replace(/https:\/\/(x-access-token:[^@]+@)?/, 'https://');
+              const authenticatedUrl = `https://x-access-token:${credentials.pat_token}@${cleanUrl.replace('https://', '')}`;
+
+              // Push to the authenticated URL directly without modifying remote config
+              await this.git.push(authenticatedUrl, 'HEAD');
+              console.log('✅ Pushed successfully to remote');
+              return true;
+            }
+          }
+        }
+
+        // Fallback to regular push if no PAT
         await this.git.push();
         console.log('✅ Pushed successfully to remote');
         return true;
@@ -48,6 +54,7 @@ export class GitService {
         }
       }
     }
+
     return false;
   }
 
