@@ -41,6 +41,8 @@ class Config:
             self.config['ollama']['url'] = os.getenv('OLLAMA_URL')
         if os.getenv('OLLAMA_MODEL'):
             self.config['ollama']['model'] = os.getenv('OLLAMA_MODEL')
+        if os.getenv('OLLAMA_THEME'):
+            self.config['ollama']['theme'] = os.getenv('OLLAMA_THEME')
 
         # Repository overrides
         if os.getenv('REPO_PATH'):

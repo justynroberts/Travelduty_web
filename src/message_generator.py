@@ -32,13 +32,14 @@ class MessageGenerator:
         self.include_diff = config.get('include_diff_context', True)
         self.commit_counter = 0
 
-    def generate(self, changed_files: list, diff: str, system_prompt: str = "") -> str:
+    def generate(self, changed_files: list, diff: str, system_prompt: str = "", theme: str = "") -> str:
         """Generate a commit message.
 
         Args:
             changed_files: List of changed file paths
             diff: Git diff output
             system_prompt: System prompt for Ollama
+            theme: Optional theme/context for commit messages (e.g., "kubernetes", "docker")
 
         Returns:
             Generated commit message
@@ -47,7 +48,7 @@ class MessageGenerator:
 
         # Try Ollama first if enabled
         if self.use_ollama and self.ollama_client:
-            message = self._generate_with_ollama(changed_files, diff, system_prompt)
+            message = self._generate_with_ollama(changed_files, diff, system_prompt, theme)
             if message:
                 return message
             logger.warning("Ollama generation failed, falling back to template")
@@ -55,20 +56,28 @@ class MessageGenerator:
         # Fallback to template
         return self._generate_from_template()
 
-    def _generate_with_ollama(self, changed_files: list, diff: str, system_prompt: str) -> Optional[str]:
+    def _generate_with_ollama(self, changed_files: list, diff: str, system_prompt: str, theme: str = "") -> Optional[str]:
         """Generate commit message using Ollama.
 
         Args:
             changed_files: List of changed file paths
             diff: Git diff output
             system_prompt: System prompt
+            theme: Optional theme/context for messages
 
         Returns:
             Generated message or None if failed
         """
         try:
             # Build user prompt with context
-            prompt_parts = ["Files changed:"]
+            prompt_parts = []
+
+            # Add theme context if provided
+            if theme:
+                prompt_parts.append(f"Context: This is a {theme} project.")
+                prompt_parts.append("")
+
+            prompt_parts.append("Files changed:")
 
             # Add file list
             for file in changed_files[:10]:  # Limit to first 10 files
@@ -84,6 +93,9 @@ class MessageGenerator:
                 prompt_parts.extend(diff_lines)
 
             prompt_parts.append("\nGenerate a concise conventional commit message:")
+
+            if theme:
+                prompt_parts.append(f"(Keep the {theme} context in mind when describing the changes)")
 
             prompt = '\n'.join(prompt_parts)
 

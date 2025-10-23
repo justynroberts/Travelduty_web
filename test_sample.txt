@@ -11,3 +11,4 @@ When this file is modified, the scheduler will:
 Modify this file to test the system.
 Test modification for Ollama commit message generation
 Another modification to test improved message parsing
+# Kubernetes deployment example

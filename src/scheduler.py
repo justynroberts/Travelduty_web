@@ -158,11 +158,13 @@ class GitScheduler:
             # Generate commit message
             ollama_config = self.config.get_ollama_config()
             system_prompt = ollama_config.get('system_prompt', '')
+            theme = ollama_config.get('theme', '')
 
             message = self.message_generator.generate(
                 changed_files=changed_files,
                 diff=diff,
-                system_prompt=system_prompt
+                system_prompt=system_prompt,
+                theme=theme
             )
 
             logger.info(f"Generated commit message: {message}")

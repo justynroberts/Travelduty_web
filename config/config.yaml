@@ -13,6 +13,7 @@ ollama:
   model: llama3.1:8b
   timeout: 30
   max_tokens: 100
+  theme: "kubernetes"  # Optional: kubernetes, docker, terraform, aws, microservices, api, frontend, backend, etc.
   system_prompt: |
     Generate a concise, realistic git commit message based on the provided file changes.
     Follow conventional commit format (type: description).
