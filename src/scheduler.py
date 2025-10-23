@@ -11,6 +11,7 @@ from .config import Config
 from .git_operations import GitOperations
 from .ollama_client import OllamaClient
 from .message_generator import MessageGenerator
+from .database import Database
 
 
 logger = logging.getLogger(__name__)
@@ -37,6 +38,9 @@ class GitScheduler:
         self.git_ops = None
         self.ollama_client = None
         self.message_generator = None
+        self.db = None
+        self.paused = False
+        self.next_commit_time = None
 
         self._initialize_components()
 
@@ -112,6 +116,13 @@ class GitScheduler:
             config=commit_config
         )
         logger.info("Message generator initialized")
+
+        # Initialize database
+        try:
+            self.db = Database()
+            logger.info("Database initialized")
+        except Exception as e:
+            logger.warning(f"Failed to initialize database: {e}")
 
     def _calculate_next_interval(self) -> float:
         """Calculate next interval with jitter.
