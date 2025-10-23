@@ -106,9 +106,35 @@ async function loadHistory() {
     }
 }
 
+// Progress Bar Functions
+function showProgress(message = 'Processing...') {
+    const container = document.getElementById('progress-container');
+    const fill = document.getElementById('progress-fill');
+    const text = document.getElementById('progress-text');
+
+    container.style.display = 'block';
+    fill.className = 'progress-fill indeterminate';
+    text.textContent = message;
+}
+
+function hideProgress() {
+    const container = document.getElementById('progress-container');
+    container.style.display = 'none';
+}
+
 // Control Actions
 async function controlAction(action) {
+    const actionMessages = {
+        'pause': 'Pausing scheduler...',
+        'resume': 'Resuming scheduler...',
+        'trigger': 'Triggering commit now...',
+        'start': 'Starting scheduler...',
+        'stop': 'Stopping scheduler...'
+    };
+
     try {
+        showProgress(actionMessages[action] || 'Processing...');
+
         const response = await fetch(`${API_BASE}/api/control`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -121,8 +147,11 @@ async function controlAction(action) {
             await loadDashboard();
         }
 
+        hideProgress();
+
     } catch (error) {
         console.error(`Error performing ${action}:`, error);
+        hideProgress();
         alert(`Failed to ${action} scheduler`);
     }
 }
