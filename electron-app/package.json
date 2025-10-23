@@ -1,0 +1,69 @@
+{
+  "name": "git-deploy-scheduler",
+  "version": "1.0.0",
+  "description": "Automated Git Deploy Scheduler with AI-powered commits",
+  "main": "src/main.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron . --dev",
+    "build": "electron-builder",
+    "build:mac": "electron-builder --mac",
+    "build:win": "electron-builder --win",
+    "build:linux": "electron-builder --linux"
+  },
+  "keywords": [
+    "git",
+    "automation",
+    "ollama",
+    "ai",
+    "commits"
+  ],
+  "author": "Git Deploy Schedule",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^28.0.0",
+    "electron-builder": "^24.9.1"
+  },
+  "dependencies": {},
+  "build": {
+    "appId": "com.gitdeployscheduler.app",
+    "productName": "Git Deploy Scheduler",
+    "mac": {
+      "category": "public.app-category.developer-tools",
+      "icon": "assets/icon.icns",
+      "target": [
+        "dmg",
+        "zip"
+      ]
+    },
+    "win": {
+      "icon": "assets/icon.ico",
+      "target": [
+        "nsis",
+        "portable"
+      ]
+    },
+    "linux": {
+      "icon": "assets/icon.png",
+      "category": "Development",
+      "target": [
+        "AppImage",
+        "deb"
+      ]
+    },
+    "files": [
+      "src/**/*",
+      "assets/**/*",
+      "../main_web.py",
+      "../src/**/*.py",
+      "../config/**/*",
+      "../web/frontend/**/*"
+    ],
+    "extraResources": [
+      {
+        "from": "../requirements.txt",
+        "to": "requirements.txt"
+      }
+    ]
+  }
+}
