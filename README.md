@@ -81,6 +81,7 @@ ollama:
   model: llama3.2:latest
   timeout: 30
   max_tokens: 100
+  theme: "kubernetes"  # Optional: kubernetes, docker, terraform, aws, etc.
 
 commit:
   use_ollama: true
@@ -101,6 +102,7 @@ Override configuration via environment variables:
 - `REPO_PATH`: Repository path
 - `OLLAMA_URL`: Ollama API URL
 - `OLLAMA_MODEL`: Ollama model name
+- `OLLAMA_THEME`: Commit message theme (e.g., "kubernetes", "docker")
 - `BASE_INTERVAL`: Base interval in seconds
 - `JITTER_RANGE`: Jitter range in seconds
 - `GIT_AUTHOR_NAME`: Git author name
@@ -172,11 +174,17 @@ ollama serve
 ## Commit Message Examples
 
 ### Ollama-Generated (AI)
+
+**Without Theme:**
 - `feat: implement JWT token validation and refresh mechanism`
 - `fix: resolve race condition in concurrent file uploads`
 - `refactor: simplify error handling in authentication module`
-- `docs: update API documentation with new endpoints`
-- `test: add unit tests for user validation logic`
+
+**With Kubernetes Theme:**
+- `feat: add kubernetes theme support and configuration`
+- `fix: resolve pod scheduling issue in production cluster`
+- `chore: update helm chart values for autoscaling`
+- `docs: add deployment guide for kubernetes ingress`
 
 ### Template-Based (Fallback)
 - `chore: automated update - 2025-10-23 14:23:45`
