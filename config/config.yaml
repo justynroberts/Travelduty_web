@@ -10,7 +10,7 @@ schedule:
 ollama:
   enabled: true
   url: http://oracle.local:11434
-  model: llama3.2:latest
+  model: llama3.1:8b
   timeout: 30
   max_tokens: 100
   system_prompt: |
