@@ -92,7 +92,15 @@ class MessageGenerator:
 
             if response:
                 # Clean and validate response
-                message = self._sanitize_message(response)
+                # Remove markdown code blocks if present
+                if response.startswith('`') and response.endswith('`'):
+                    response = response.strip('`').strip()
+
+                # Take only first line if Ollama added explanation
+                lines = response.split('\n')
+                message = lines[0].strip()
+
+                message = self._sanitize_message(message)
                 if self._validate_message(message):
                     return message
                 else:
