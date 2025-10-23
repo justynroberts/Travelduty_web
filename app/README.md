@@ -223,84 +223,415 @@ app/
 └── README.md
 ```
 
-## API Endpoints
+## 📡 API Documentation
 
-### Status & History
-- `GET /api/status` - Get scheduler status
-- `GET /api/history?limit=10` - Get recent commits
-- `GET /api/stats` - Get statistics
+All endpoints return JSON responses. Base URL: `http://localhost:3001/api`
 
-### Controls
-- `POST /api/control` - Control scheduler
-  - `{ "action": "pause" }` - Pause scheduler
-  - `{ "action": "resume" }` - Resume scheduler
-  - `{ "action": "trigger" }` - Trigger commit now
-  - `{ "action": "start" }` - Start scheduler
-  - `{ "action": "stop" }` - Stop scheduler
+### Status & Monitoring
 
-### Settings
-- `GET /api/settings/credentials` - Check if credentials exist
-- `POST /api/settings/credentials` - Save credentials
-  ```json
-  {
-    "pat_token": "ghp_xxxxx",
-    "git_username": "your-username",
-    "git_email": "you@example.com"
+#### `GET /api/status`
+Get current scheduler status and configuration.
+
+**Response:**
+```json
+{
+  "running": true,
+  "paused": false,
+  "nextRun": "2025-10-23T15:16:20.563Z",
+  "config": {
+    "git": {
+      "repo_path": "/path/to/repo",
+      "push_enabled": true,
+      "retry_attempts": 3,
+      "retry_delay": 5000
+    },
+    "schedule": {
+      "base_interval": 600,
+      "jitter_range": 50,
+      "enabled": true
+    },
+    "ollama": {
+      "enabled": true,
+      "url": "http://localhost:11434",
+      "model": "llama3.1:8b",
+      "theme": "kubernetes",
+      "timeout": 30000
+    },
+    "server": {
+      "host": "0.0.0.0",
+      "port": 3001
+    }
   }
-  ```
-- `DELETE /api/settings/credentials` - Delete credentials
-- `GET /api/settings/config` - Get configuration
-- `PATCH /api/settings/config` - Update configuration
+}
+```
 
-## Settings UI
+#### `GET /api/history?limit=10`
+Get recent commit history.
 
-The settings page allows you to:
+**Query Parameters:**
+- `limit` (optional, default: 10) - Number of commits to return
 
-1. **Manage Git Credentials**
-   - Save PAT token securely in system keychain
-   - Configure git username and email
-   - Delete stored credentials
+**Response:**
+```json
+{
+  "commits": [
+    {
+      "id": 1,
+      "commit_hash": "c4ba5c1...",
+      "message": "Refactor implementation: config/config.yaml",
+      "files_changed": 2,
+      "timestamp": "2025-10-23 15:06:22",
+      "success": 1,
+      "used_ollama": 0,
+      "theme": "kubernetes",
+      "push_success": 0,
+      "error_message": null
+    }
+  ]
+}
+```
 
-2. **Configure Scheduler**
-   - Set base interval (seconds)
-   - Set jitter range (±seconds)
-   - Choose AI commit theme
-   - Enable/disable auto-push
+#### `GET /api/stats`
+Get commit statistics.
 
-## Security
+**Response:**
+```json
+{
+  "id": 1,
+  "total_commits": 42,
+  "successful_commits": 40,
+  "failed_commits": 2,
+  "total_files_changed": 156,
+  "ollama_usage_count": 38,
+  "last_commit_time": "2025-10-23 15:06:22",
+  "updated_at": "2025-10-23 15:06:22",
+  "next_scheduled_commit": "2025-10-23T15:16:20.563Z"
+}
+```
 
-- **Keytar Integration**: Credentials stored in OS keychain/credential manager
-- **No Hardcoded Secrets**: All sensitive data in secure storage
-- **CORS Enabled**: For development
-- **Context Isolation**: TypeScript types prevent errors
+### Scheduler Controls
 
-## Configuration
+#### `POST /api/control`
+Control scheduler operations.
 
-The app reads from `../config/config.yaml`:
+**Request Body:**
+```json
+{
+  "action": "pause" | "resume" | "trigger" | "start" | "stop"
+}
+```
+
+**Actions:**
+- `pause` - Pause the scheduler (stops scheduling new commits, but keeps running)
+- `resume` - Resume a paused scheduler
+- `trigger` - Trigger an immediate commit (bypasses scheduling)
+- `start` - Start the scheduler
+- `stop` - Stop the scheduler completely
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Scheduler paused"
+}
+```
+
+**Example:**
+```bash
+curl -X POST http://localhost:3001/api/control \
+  -H "Content-Type: application/json" \
+  -d '{"action":"pause"}'
+```
+
+### Settings Management
+
+#### `GET /api/settings/credentials`
+Check if credentials are stored in keychain.
+
+**Response:**
+```json
+{
+  "hasCredentials": true,
+  "hasPatToken": true,
+  "hasUsername": true,
+  "hasEmail": true
+}
+```
+
+#### `POST /api/settings/credentials`
+Save Git credentials to secure keychain.
+
+**Request Body:**
+```json
+{
+  "pat_token": "ghp_xxxxxxxxxxxxxxxxxxxxx",
+  "git_username": "your-github-username",
+  "git_email": "you@example.com"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Credentials saved successfully"
+}
+```
+
+#### `DELETE /api/settings/credentials`
+Delete stored credentials from keychain.
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Credentials deleted"
+}
+```
+
+#### `GET /api/settings/config`
+Get current configuration (same as config in `/api/status`).
+
+#### `PATCH /api/settings/config`
+Update configuration dynamically. Changes are written to `config.yaml`.
+
+**Request Body (partial updates supported):**
+```json
+{
+  "schedule": {
+    "base_interval": 1200
+  },
+  "ollama": {
+    "theme": "docker"
+  }
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "config": { /* updated config */ }
+}
+```
+
+## 🖥️ Dashboard UI
+
+The web dashboard provides a complete interface for managing the scheduler:
+
+### Dashboard Tab
+- **Real-time Status Card**
+  - Scheduler running/paused state with visual indicators
+  - Next scheduled commit time countdown
+  - Config-at-a-glance (interval, jitter, theme, push enabled)
+
+- **Control Buttons**
+  - Pause/Resume scheduler
+  - Trigger immediate commit
+  - Stop scheduler
+
+- **Statistics Card**
+  - Total commits (successful/failed)
+  - Files changed count
+  - AI usage percentage
+  - Last commit timestamp
+
+- **Recent Commits Table**
+  - Commit hash (first 7 chars)
+  - Full commit message
+  - Files changed count
+  - Timestamp
+  - Success/failure status
+  - AI-generated indicator
+
+### Settings Tab
+
+**Git Credentials Section:**
+- Visual indicator showing credential status (stored/not stored)
+- PAT token input (password field)
+- Git username input
+- Git email input
+- Save/Delete credential buttons
+- All credentials saved to OS-level keychain (never in config files)
+
+**Scheduler Configuration Section:**
+- Base interval slider (60-3600 seconds)
+- Jitter range slider (0-300 seconds)
+- AI commit theme dropdown (kubernetes, docker, terraform, general)
+- Push enabled toggle
+- Save configuration button (updates `config.yaml`)
+
+**UI Features:**
+- Auto-refresh every 5 seconds
+- Material Design with Material Icons
+- Google Fonts (Inter)
+- Gradient purple color scheme
+- Responsive layout
+- Real-time validation
+- Success/error toast notifications
+
+## 🤖 Commit Message Generation
+
+The app supports two modes for generating commit messages:
+
+### AI-Powered Mode (Ollama)
+
+When Ollama is enabled and reachable, the app:
+
+1. **Analyzes Changed Files**: Reads `git diff` to understand what changed
+2. **Sends Context to Ollama**: Provides file changes and selected theme
+3. **Receives AI-Generated Message**: Contextual, domain-specific commit message
+4. **Records Usage**: Tracks AI-generated commits in database
+
+**Supported Themes:**
+- `kubernetes` - Messages like "Optimize pod scheduling", "Update ingress configuration"
+- `docker` - Messages like "Refactor container build", "Update Dockerfile layers"
+- `terraform` - Messages like "Update infrastructure state", "Refactor resource definitions"
+- `general` - Standard software development messages
+
+**Example AI-Generated Messages:**
+```
+Kubernetes theme:
+- "Scale replica count for high availability"
+- "Update ConfigMap for production environment"
+- "Optimize resource limits and requests"
+
+Docker theme:
+- "Refactor multi-stage build process"
+- "Update base image to alpine:latest"
+- "Optimize layer caching strategy"
+
+Terraform theme:
+- "Update AWS provider configuration"
+- "Refactor module variables structure"
+- "Add lifecycle policies to resources"
+```
+
+### Fallback Mode (Template-Based)
+
+When Ollama is disabled or unreachable:
+
+1. **Template Selection**: Randomly selects from theme-specific templates
+2. **File Injection**: Includes actual changed filenames
+3. **Commit**: Creates commit with template message
+
+**Template Examples:**
+```
+- "Refactor implementation: config.yaml, database.db"
+- "Update configuration: src/index.ts"
+- "Optimize deployment: Dockerfile, k8s/deployment.yaml"
+```
+
+### Commit Message Configuration
+
+In `src/services/messageGenerator.ts`:
+- Customize AI prompts for each theme
+- Add new themes
+- Adjust template messages
+- Configure Ollama timeout and retry logic
+
+## 🔒 Security
+
+### Credential Storage
+- **Keytar Library**: Native Node.js bindings to OS keychains
+- **macOS**: Credentials stored in Keychain Access (same as Safari, Chrome passwords)
+- **Windows**: Windows Credential Manager (same as Windows Login credentials)
+- **Linux**: libsecret (GNOME Keyring, KWallet)
+- **Zero Plain-Text Storage**: PAT tokens never written to disk or config files
+- **Per-User Isolation**: Credentials scoped to current OS user
+
+### Code Security
+- **TypeScript**: Type safety prevents common errors
+- **Express.js**: Industry-standard backend framework
+- **CORS**: Configurable cross-origin restrictions
+- **Input Validation**: All API inputs validated
+- **Error Handling**: Graceful degradation, no sensitive data in error messages
+
+### Best Practices
+- PAT tokens should have minimal scopes (only `repo`)
+- Use dedicated PAT for this app (not your main GitHub token)
+- Rotate tokens periodically
+- Run on `localhost` only (unless deploying to private network)
+- Use HTTPS reverse proxy for remote access
+
+## ⚙️ Configuration Deep Dive
+
+Configuration file: `../config/config.yaml` (relative to `app/` directory)
+
+### Git Configuration
 
 ```yaml
 git:
-  repo_path: "/path/to/repo"
-  push_enabled: true
-  retry_attempts: 3
-  retry_delay: 5000
-
-schedule:
-  base_interval: 600  # 10 minutes
-  jitter_range: 50    # ±50 seconds
-  enabled: true
-
-ollama:
-  enabled: true
-  url: "http://oracle.local:11434"
-  model: "llama3.1:8b"
-  theme: "kubernetes"
-  timeout: 30000
-
-server:
-  host: "0.0.0.0"
-  port: 5000
+  repo_path: "/absolute/path/to/repo"  # MUST be absolute path
+  push_enabled: true                   # Set false to commit locally only
+  retry_attempts: 3                    # Number of push retries on failure
+  retry_delay: 5000                    # Milliseconds between retries
 ```
+
+**Key Points:**
+- `repo_path` MUST be an absolute path to an initialized Git repository
+- `push_enabled: false` useful for testing or local-only commits
+- Retry logic uses exponential backoff
+
+### Schedule Configuration
+
+```yaml
+schedule:
+  base_interval: 600     # Seconds between commits (600 = 10 minutes)
+  jitter_range: 50       # Random variation: ±50 seconds
+  enabled: true          # Auto-start scheduler on app launch
+```
+
+**How Jitter Works:**
+- Base interval: 600 seconds (10 minutes)
+- Jitter range: ±50 seconds
+- Actual interval: Random between 550-650 seconds
+- **Why?** Makes commits appear human-like, not automated
+
+**Interval Guidelines:**
+- Minimum: 60 seconds (avoid spam)
+- Recommended: 300-1800 seconds (5-30 minutes)
+- Maximum: 3600 seconds (1 hour)
+
+### Ollama Configuration
+
+```yaml
+ollama:
+  enabled: true                        # Enable AI commit messages
+  url: "http://localhost:11434"        # Ollama API endpoint
+  model: "llama3.1:8b"                 # Model name (llama3.1, mistral, etc.)
+  theme: "kubernetes"                  # Message theme
+  timeout: 30000                       # API timeout in milliseconds
+```
+
+**Supported Models:**
+- `llama3.1:8b` (recommended) - Fast, high-quality
+- `llama3.1:70b` - Slower, more detailed
+- `mistral:7b` - Alternative, good quality
+- Any Ollama-compatible model
+
+**Themes:**
+- `kubernetes` - K8s/cloud-native terminology
+- `docker` - Container/Docker contexts
+- `terraform` - IaC/cloud infrastructure
+- `general` - Standard software dev
+
+### Server Configuration
+
+```yaml
+server:
+  host: "0.0.0.0"      # Listen on all interfaces (or "localhost" for local only)
+  port: 3001           # HTTP port
+```
+
+**Host Options:**
+- `0.0.0.0` - Listen on all network interfaces (LAN access)
+- `localhost` / `127.0.0.1` - Local access only (more secure)
+
+**Port Considerations:**
+- Default: 3001 (avoid conflicts with common ports)
+- Must be available (check with `lsof -ti:3001`)
+- Use reverse proxy (nginx/caddy) for HTTPS in production
 
 ## Development
 
