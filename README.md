@@ -265,6 +265,31 @@ logging:
   file: logs/scheduler.log
 ```
 
+## Git Authentication
+
+To push commits to a remote repository, you need to configure git authentication.
+
+### Quick Setup (PAT Token)
+
+1. **Create Personal Access Token** on GitHub/GitLab
+2. **Configure git credential helper:**
+   ```bash
+   git config --global credential.helper osxkeychain  # macOS
+   git config --global credential.helper store        # Linux
+   ```
+3. **Set remote URL with username:**
+   ```bash
+   git remote add origin https://YOUR_USERNAME@github.com/user/repo.git
+   ```
+4. **Enable push in config:**
+   ```yaml
+   push:
+     enabled: true
+   ```
+5. **Test:** When you push, enter your PAT token when prompted
+
+See [GIT_AUTH.md](GIT_AUTH.md) for detailed authentication options including SSH keys, Docker setup, and security best practices.
+
 ## Troubleshooting
 
 ### Ollama Connection Issues
@@ -273,10 +298,12 @@ logging:
 - Verify URL in configuration
 - Check logs for connection errors
 
-### Git Authentication
-- For SSH: Ensure SSH keys are configured
-- For HTTPS: Configure git credentials
-- Docker: Mount SSH keys as volume in docker-compose.yml
+### Git Authentication Issues
+- **PAT Token**: Use git credential helper to store token securely
+- **For SSH**: Ensure SSH keys are configured and added to ssh-agent
+- **For HTTPS**: Configure git credentials with `git config credential.helper`
+- **Docker**: Mount SSH keys or git-credentials file as volumes
+- See [GIT_AUTH.md](GIT_AUTH.md) for complete authentication guide
 
 ### No Changes to Commit
 - The scheduler only commits when there are file changes
